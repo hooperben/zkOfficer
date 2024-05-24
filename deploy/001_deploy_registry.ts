@@ -1,14 +1,33 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 
+import { poseidonContract } from "circomlibjs";
+
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const {
     ethers,
     deployments,
-    deployments: { deploy },
+    deployments: { deploy, save },
   } = hre;
 
   const [Deployer] = await ethers.getSigners();
+
+  // we need to deploy the poseidon hasher contract for the merkletreewithhistory contract
+  const hasherAbi = poseidonContract.generateABI(2);
+  const HasherFactory = new ethers.ContractFactory(
+    hasherAbi,
+    poseidonContract.createCode(2),
+    Deployer
+  );
+
+  const tx = await HasherFactory.deploy();
+  await tx.waitForDeployment();
+  const hasherAddress = await tx.getAddress();
+
+  await save("Hasher", {
+    abi: hasherAbi,
+    address: hasherAddress,
+  });
 
   await deploy("UltraVerifier", {
     from: Deployer.address,
@@ -20,11 +39,11 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   await deploy("Registry", {
     from: Deployer.address,
-    args: [UltraVerifier],
+    args: [UltraVerifier, hasherAddress],
     log: true,
     autoMine: true,
   });
 };
 
 export default func;
-func.tags = ["btc", "testbed"];
+func.tags = ["testbed"];

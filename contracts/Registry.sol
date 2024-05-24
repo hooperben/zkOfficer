@@ -3,10 +3,31 @@ pragma solidity ^0.8.24;
 
 import "./merkle/plonk_vk.sol";
 
-contract Registry {
+import "./MerkleTreeWithHistory.sol";
+
+contract Registry is MerkleTreeWithHistory {
     UltraVerifier public verifier;
 
-    constructor(address _verifier) {
+    constructor(
+        address _verifier,
+        address hasher
+    )
+        MerkleTreeWithHistory(
+            8,
+            hasher,
+            0x220e4b4823da0db552468228884e3a4675fc1bee50cb697891977312ae922800
+        )
+    {
         verifier = UltraVerifier(_verifier);
+    }
+
+    function verifyProof(
+        bytes calldata _proof,
+        bytes32[] calldata _publicInputs
+    ) public view returns (bool) {
+        // check our root is known
+        require(isKnownRoot(_publicInputs[0]), "Invalid root");
+
+        return verifier.verify(_proof, _publicInputs);
     }
 }

@@ -1,5 +1,5 @@
 {
-  "name": "hardhat-project",
+  "name": "zkOfficer",
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
     "@nomicfoundation/hardhat-ethers": "^3.0.0",
@@ -21,7 +21,11 @@
     "solidity-coverage": "^0.8.1",
     "ts-node": "^10.9.2",
     "typechain": "^8.3.0",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "@noir-lang/backend_barretenberg": "^0.25.0",
+    "@noir-lang/noir_js": "^0.25.0",
+    "@noir-lang/noir_wasm": "^0.25.0",
+    "@noir-lang/types": "^0.25.0"
   },
   "dependencies": {
     "circomlibjs": "^0.1.7",
@@ -29,6 +33,7 @@
     "fixed-merkle-tree": "^0.7.3"
   },
   "scripts": {
-    "build:contracts": "cd merkle && nargo codegen-verifier && cp contract/merkle/plonk_vk.sol ../contracts/merkle/plonk_vk.sol"
+    "build:contracts": "cd merkle && nargo codegen-verifier && cp contract/merkle/plonk_vk.sol ../contracts/merkle/plonk_vk.sol",
+    "build:test": "yarn build:contracts && hardhat test"
   }
 }
