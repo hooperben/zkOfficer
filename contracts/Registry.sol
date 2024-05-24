@@ -8,6 +8,8 @@ import "./MerkleTreeWithHistory.sol";
 contract Registry is MerkleTreeWithHistory {
     UltraVerifier public verifier;
 
+    address public owner;
+
     constructor(
         address _verifier,
         address hasher
@@ -19,6 +21,12 @@ contract Registry is MerkleTreeWithHistory {
         )
     {
         verifier = UltraVerifier(_verifier);
+        owner = msg.sender;
+    }
+
+    function addLeaf(bytes32 _leaf) public {
+        require(msg.sender == owner, "Only owner can add leaf");
+        _insert(_leaf, bytes32("111111111111111111"));
     }
 
     function verifyProof(
@@ -30,4 +38,8 @@ contract Registry is MerkleTreeWithHistory {
 
         return verifier.verify(_proof, _publicInputs);
     }
+
+    // function verifyAsBusiness(
+
+    // )
 }

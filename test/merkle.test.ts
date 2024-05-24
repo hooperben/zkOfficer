@@ -13,7 +13,7 @@ import { BarretenbergBackend } from "@noir-lang/backend_barretenberg";
 import { compile, createFileManager } from "@noir-lang/noir_wasm";
 import { CompiledCircuit } from "@noir-lang/types";
 import { resolve } from "path";
-import { Contract } from "ethers";
+import { AbiCoder, Contract, keccak256 } from "ethers";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 
 const getCircuit = async () => {
@@ -26,10 +26,31 @@ const getCircuit = async () => {
   return result.program as CompiledCircuit;
 };
 
+const getRandomBigInt = (bits: number) => {
+  const bytes = Math.ceil(bits / 8);
+  const extraBits = bytes * 8 - bits; // Extra bits we get due to byte alignment
+  const arraySize = Math.ceil(bits / 32);
+  const randomValues = new Uint32Array(arraySize);
+  crypto.getRandomValues(randomValues);
+
+  let randomBigInt = BigInt(0);
+  for (let i = 0; i < arraySize - 1; i++) {
+    randomBigInt = (randomBigInt << BigInt(32)) | BigInt(randomValues[i]);
+  }
+
+  // For the last element, only shift the necessary bits
+  randomBigInt =
+    (randomBigInt << BigInt(32 - extraBits)) |
+    (BigInt(randomValues[arraySize - 1]) >> BigInt(extraBits));
+
+  return randomBigInt;
+};
+
 describe("Merkle Tree Testing", function () {
   let registry: Registry;
 
   let Deployer: SignerWithAddress;
+  let Authority: SignerWithAddress;
 
   let circuit: CompiledCircuit;
   let noir: Noir;
@@ -37,7 +58,7 @@ describe("Merkle Tree Testing", function () {
   before("hello", async () => {
     await deployments.fixture("testbed");
 
-    [Deployer] = await ethers.getSigners();
+    [Authority, Deployer] = await ethers.getSigners();
 
     await ensurePoseidon();
 
@@ -56,7 +77,7 @@ describe("Merkle Tree Testing", function () {
     ) as unknown as Registry;
   });
 
-  it.only("should run", async () => {
+  it("should run", async () => {
     const leaves: string[] = [
       poseidonHash([
         13780856135824609486835123660791248959181113742546918549559321242116770234576n,
@@ -81,5 +102,38 @@ describe("Merkle Tree Testing", function () {
 
     // @ts-ignore
     await registry.verifyProof(correctProof.proof, correctProof.publicInputs);
+  });
+
+  it.only("NFC Chip Flow", async () => {
+    const message = {
+      firstname: "John",
+      lastname: "Doe",
+    };
+
+    // sign that
+    const encodedMessage = AbiCoder.defaultAbiCoder().encode(
+      ["string", "string"],
+      [message.firstname, message.lastname]
+    );
+
+    const messageHash = keccak256(encodedMessage);
+    const signedMessage = await Authority.signMessage(messageHash);
+
+    // this signed message is what lives on the NFC chip
+
+    // a user would submit the message + that signed message + some hash of some randomness
+    const random = getRandomBigInt(256);
+    const hashedRandom = poseidonHash([random]);
+
+    const authorityMessage = {
+      message,
+      signedMessage,
+      hashedRandom,
+    };
+    console.log(authorityMessage);
+
+    const newLeaf = poseidonHash([signedMessage, hashedRandom]);
+
+    console.log("newLeaf", newLeaf);
   });
 });
