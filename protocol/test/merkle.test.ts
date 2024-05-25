@@ -87,7 +87,7 @@ describe("Merkle Tree Testing", function () {
     ) as unknown as NonSybilERC20;
   });
 
-  it.only("should run with a pre stocked tree", async () => {
+  it("should run with a pre stocked tree", async () => {
     const message = {
       firstname: "John",
       lastname: "Doe",
@@ -185,7 +185,7 @@ describe("Merkle Tree Testing", function () {
     expect(balanceAfter).to.greaterThan(balanceBefore);
   });
 
-  it("NFC Chip Flow", async () => {
+  it("Test Signatures", async () => {
     const message = {
       firstname: "John",
       lastname: "Doe",
