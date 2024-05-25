@@ -77,6 +77,83 @@ describe("Merkle Tree Testing", function () {
     ) as unknown as Registry;
   });
 
+  it.only("should run with a pre stocked tree", async () => {
+    const message = {
+      firstname: "John",
+      lastname: "Doe",
+    };
+    const encodedMessage = AbiCoder.defaultAbiCoder().encode(
+      ["string", "string"],
+      [message.firstname, message.lastname]
+    );
+    const messageHash = keccak256(encodedMessage);
+    const signedMessage = await Authority.signMessage(messageHash);
+
+    // a user would submit the message + that signed message + some hash of some randomness
+    const userUsersNewSecret = poseidonHash([getRandomBigInt(256)]);
+    const newLeaf = poseidonHash([signedMessage, userUsersNewSecret]);
+
+    // add the leaf to the tree
+    const abi = new AbiCoder();
+
+    await registry
+      .connect(Authority)
+      .addLeaf(abi.encode(["uint256"], [newLeaf]));
+
+    // get the leaves from the event
+    const filter = registry.filters.NewLeaf();
+    const events = await registry.queryFilter(filter);
+
+    // sort the leaves in the tree
+    const leaves = events
+      .sort((a, b) => {
+        return Number(a.args?.leafIndex) - Number(b.args?.leafIndex);
+      })
+      .map((e) => {
+        return e.args?.indexedleaf.toString();
+      });
+
+    // construct the tree
+    const tree = new MerkleTree(8, leaves, {
+      hashFunction: poseidonHash2,
+      zeroElement:
+        "21663839004416932945382355908790599225266501822907911457504978515578255421292",
+    });
+
+    const test = tree.proof(leaves[0]);
+    const input = {
+      root: tree.root,
+      leaf: leaves[0],
+      path_indices: test.pathIndices,
+      siblings: test.pathElements,
+    };
+    // Generate proof
+    const correctProof = await noir.generateProof(input);
+
+    // @ts-ignore
+    await registry.verifyProof(correctProof.proof, correctProof.publicInputs);
+  });
+
+  it("NFC Chip Flow", async () => {
+    const message = {
+      firstname: "John",
+      lastname: "Doe",
+    };
+
+    const encodedMessage = AbiCoder.defaultAbiCoder().encode(
+      ["string", "string"],
+      [message.firstname, message.lastname]
+    );
+    const messageHash = keccak256(encodedMessage);
+    const signedMessage = await Authority.signMessage(messageHash);
+
+    // a user would submit the message + that signed message + some hash of some randomness
+    const userUsersNewSecret = poseidonHash([getRandomBigInt(256)]);
+    const newLeaf = poseidonHash([signedMessage, userUsersNewSecret]);
+
+    console.log("newLeaf", newLeaf);
+  });
+
   it("should run", async () => {
     const leaves: string[] = [
       poseidonHash([
@@ -102,38 +179,5 @@ describe("Merkle Tree Testing", function () {
 
     // @ts-ignore
     await registry.verifyProof(correctProof.proof, correctProof.publicInputs);
-  });
-
-  it.only("NFC Chip Flow", async () => {
-    const message = {
-      firstname: "John",
-      lastname: "Doe",
-    };
-
-    // sign that
-    const encodedMessage = AbiCoder.defaultAbiCoder().encode(
-      ["string", "string"],
-      [message.firstname, message.lastname]
-    );
-
-    const messageHash = keccak256(encodedMessage);
-    const signedMessage = await Authority.signMessage(messageHash);
-
-    // this signed message is what lives on the NFC chip
-
-    // a user would submit the message + that signed message + some hash of some randomness
-    const random = getRandomBigInt(256);
-    const hashedRandom = poseidonHash([random]);
-
-    const authorityMessage = {
-      message,
-      signedMessage,
-      hashedRandom,
-    };
-    console.log(authorityMessage);
-
-    const newLeaf = poseidonHash([signedMessage, hashedRandom]);
-
-    console.log("newLeaf", newLeaf);
   });
 });
