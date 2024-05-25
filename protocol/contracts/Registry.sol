@@ -4,8 +4,6 @@ pragma solidity ^0.8.24;
 import "./merkle/plonk_vk.sol";
 import "./MerkleTreeWithHistory.sol";
 
-import "hardhat/console.sol";
-
 contract Registry is MerkleTreeWithHistory {
     event NewLeaf(bytes32 indexedleaf, uint256 indexed leafIndex);
 
@@ -22,8 +20,6 @@ contract Registry is MerkleTreeWithHistory {
     ) MerkleTreeWithHistory(8, hasher, zk_leaf_root_______) {
         verifier = UltraVerifier(_verifier);
         authority = msg.sender;
-
-        console.log(uint256(zk_leaf_root_______));
     }
 
     function addLeaf(bytes32 _leaf) public {
@@ -45,7 +41,6 @@ contract Registry is MerkleTreeWithHistory {
     ) external view returns (bool) {
         // check our root is known
         require(isKnownRoot(_publicInputs[0]), "Invalid root");
-
         return verifier.verify(_proof, _publicInputs);
     }
 }
