@@ -71,34 +71,41 @@ const Register = () => {
       </div>
 
       {isSigValid && (
-        <div className="mb-4 w-[500px] flex flex-row">
-          <div className="flex flex-col">
-            <label htmlFor="firstName" className="block font-bold text-md mb-2">
-              First Name
-            </label>
-            <input
-              type="text"
-              id="firstName"
-              value={firstName}
-              onChange={handleFNChange}
-              className="w=[200px] shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            />
-          </div>
+        <div>
+          <div className="mb-4 w-[500px] flex flex-row">
+            <div className="flex flex-col">
+              <label
+                htmlFor="firstName"
+                className="block font-bold text-md mb-2"
+              >
+                First Name
+              </label>
+              <input
+                type="text"
+                id="firstName"
+                value={firstName}
+                onChange={handleFNChange}
+                className="w=[200px] shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              />
+            </div>
 
-          <div className="ml-2 flex flex-col">
-            <label htmlFor="lastName" className="block font-bold text-md mb-2">
-              Last Name
-            </label>
-            <input
-              type="text"
-              id="lastName"
-              value={lastName}
-              onChange={handleLNChange}
-              className="w=[200px] shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            />
+            <div className="ml-2 flex flex-col">
+              <label
+                htmlFor="lastName"
+                className="block font-bold text-md mb-2"
+              >
+                Last Name
+              </label>
+              <input
+                type="text"
+                id="lastName"
+                value={lastName}
+                onChange={handleLNChange}
+                className="w=[200px] shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              />
+            </div>
           </div>
-
-          <div className="ml-[20px] mt-[30px]">
+          <div className="mt-[30px]">
             <Button
               onClick={() => console.log("hello")}
               text="Register"
