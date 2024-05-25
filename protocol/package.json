@@ -34,7 +34,7 @@
     "fixed-merkle-tree": "^0.7.3"
   },
   "scripts": {
-    "build:contracts": "cd merkle && nargo codegen-verifier && cp contract/merkle/plonk_vk.sol ../contracts/merkle/plonk_vk.sol",
-    "build:test": "yarn build:contracts && hardhat test"
+    "build:contracts": "cd merkle && nargo codegen-verifier && cp contract/merkle/plonk_vk.sol ../contracts/merkle/plonk_vk.sol && cd ..",
+    "build:test": "yarn build:contracts && npx hardhat test"
   }
 }

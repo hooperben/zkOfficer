@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 
 import "./merkle/plonk_vk.sol";
 
-contract MyToken is ERC20, ERC20Permit {
+contract NonSybilERC20 is ERC20, ERC20Permit {
     UltraVerifier public verifier;
 
     mapping(bytes32 => bool) public nullifiers;
@@ -22,7 +22,9 @@ contract MyToken is ERC20, ERC20Permit {
         bytes calldata _proof,
         bytes32[] calldata _publicInputs
     ) public {
+        require(!nullifiers[_publicInputs[1]], "Nullifier used");
         require(verifier.verify(_proof, _publicInputs), "Invalid proof");
+        nullifiers[_publicInputs[1]] = true;
         _mint(to, 100e18);
     }
 }

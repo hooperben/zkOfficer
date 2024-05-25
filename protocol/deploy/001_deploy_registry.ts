@@ -43,6 +43,14 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     log: true,
     autoMine: true,
   });
+
+  // next we deploy our test ERC20 contract
+  await deploy("NonSybilERC20", {
+    from: Deployer.address,
+    args: [UltraVerifier],
+    log: true,
+    autoMine: true,
+  });
 };
 
 export default func;

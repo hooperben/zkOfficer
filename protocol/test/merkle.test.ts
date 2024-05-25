@@ -1,5 +1,5 @@
 import hre, { deployments, ethers } from "hardhat";
-import { Registry } from "../typechain-types";
+import { NonSybilERC20, Registry } from "../typechain-types";
 import { MerkleTree } from "fixed-merkle-tree";
 import {
   ensurePoseidon,
@@ -15,6 +15,7 @@ import { CompiledCircuit } from "@noir-lang/types";
 import { resolve } from "path";
 import { AbiCoder, Contract, keccak256 } from "ethers";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
+import { expect } from "chai";
 
 const getCircuit = async () => {
   const basePath = resolve("./merkle/");
@@ -48,9 +49,11 @@ const getRandomBigInt = (bits: number) => {
 
 describe("Merkle Tree Testing", function () {
   let registry: Registry;
+  let nonSybilERC20: NonSybilERC20;
 
   let Deployer: SignerWithAddress;
   let Authority: SignerWithAddress;
+  let SybilTokenReceiver: SignerWithAddress;
 
   let circuit: CompiledCircuit;
   let noir: Noir;
@@ -58,7 +61,7 @@ describe("Merkle Tree Testing", function () {
   before("hello", async () => {
     await deployments.fixture("testbed");
 
-    [Authority, Deployer] = await ethers.getSigners();
+    [Authority, Deployer, SybilTokenReceiver] = await ethers.getSigners();
 
     await ensurePoseidon();
 
@@ -75,6 +78,13 @@ describe("Merkle Tree Testing", function () {
       registryDeployment.abi,
       Deployer
     ) as unknown as Registry;
+
+    const NonSybilERC20Deployment = await hre.deployments.get("NonSybilERC20");
+    nonSybilERC20 = new Contract(
+      NonSybilERC20Deployment.address,
+      NonSybilERC20Deployment.abi,
+      Deployer
+    ) as unknown as NonSybilERC20;
   });
 
   it.only("should run with a pre stocked tree", async () => {
@@ -120,9 +130,17 @@ describe("Merkle Tree Testing", function () {
         "21663839004416932945382355908790599225266501822907911457504978515578255421292",
     });
 
+    const addressAsPoseidon = poseidonHash([await registry.getAddress()]);
+    const hashAddressAndRoot = poseidonHash([
+      BigInt(tree.root),
+      BigInt(addressAsPoseidon),
+    ]);
+
     const test = tree.proof(leaves[0]);
     const input = {
       root: tree.root,
+      nullifier: hashAddressAndRoot,
+      using_address: addressAsPoseidon,
       leaf: leaves[0],
       path_indices: test.pathIndices,
       siblings: test.pathElements,
@@ -130,8 +148,41 @@ describe("Merkle Tree Testing", function () {
     // Generate proof
     const correctProof = await noir.generateProof(input);
 
-    // @ts-ignore
-    await registry.verifyProof(correctProof.proof, correctProof.publicInputs);
+    expect(
+      await registry.verifyProof(correctProof.proof, correctProof.publicInputs)
+    ).to.equal(true);
+
+    // NOW LETS MINT A TOKEN WITH OUR PROOF
+    const sybilAddressAsHash = poseidonHash([await registry.getAddress()]);
+    const hashSybilAddressAndRoot = poseidonHash([
+      BigInt(tree.root),
+      BigInt(addressAsPoseidon),
+    ]);
+
+    const mintInput = {
+      root: tree.root,
+      nullifier: hashSybilAddressAndRoot,
+      using_address: sybilAddressAsHash,
+      leaf: leaves[0],
+      path_indices: test.pathIndices,
+      siblings: test.pathElements,
+    };
+
+    const mintProof = await noir.generateProof(mintInput);
+
+    const balanceBefore = await nonSybilERC20.balanceOf(
+      SybilTokenReceiver.address
+    );
+    await nonSybilERC20.mint(
+      SybilTokenReceiver.address,
+      mintProof.proof,
+      mintProof.publicInputs
+    );
+    const balanceAfter = await nonSybilERC20.balanceOf(
+      SybilTokenReceiver.address
+    );
+
+    expect(balanceAfter).to.greaterThan(balanceBefore);
   });
 
   it("NFC Chip Flow", async () => {
@@ -152,32 +203,5 @@ describe("Merkle Tree Testing", function () {
     const newLeaf = poseidonHash([signedMessage, userUsersNewSecret]);
 
     console.log("newLeaf", newLeaf);
-  });
-
-  it("should run", async () => {
-    const leaves: string[] = [
-      poseidonHash([
-        13780856135824609486835123660791248959181113742546918549559321242116770234576n,
-      ]),
-    ];
-
-    const tree = new MerkleTree(8, leaves, {
-      hashFunction: poseidonHash2,
-      zeroElement:
-        "21663839004416932945382355908790599225266501822907911457504978515578255421292",
-    });
-
-    const test = tree.proof(leaves[0]);
-    const input = {
-      root: tree.root,
-      leaf: leaves[0],
-      path_indices: test.pathIndices,
-      siblings: test.pathElements,
-    };
-    // Generate proof
-    const correctProof = await noir.generateProof(input);
-
-    // @ts-ignore
-    await registry.verifyProof(correctProof.proof, correctProof.publicInputs);
   });
 });

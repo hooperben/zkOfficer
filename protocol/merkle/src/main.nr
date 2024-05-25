@@ -17,10 +17,17 @@ fn compute_merkle_root(leaf: Field, path_indices: [Field; 8], siblings: [Field; 
     current
 }
 
-fn main(root: pub Field, leaf: Field, path_indices: [Field; 8], siblings: [Field; 8]) {
+fn hash_root_with_nullifier(root: Field, nullifier: Field) -> Field {
+    std::hash::poseidon::bn254::hash_2([root, nullifier])
+}
+
+fn main(root: pub Field, nullifier: pub Field, using_address: Field, leaf: Field, path_indices: [Field; 8], siblings: [Field; 8]) {
     // generate merkle root
     let new_root = compute_merkle_root(leaf, path_indices, siblings);
     assert(new_root == root);
+
+    let new_nullifier = hash_root_with_nullifier(root, using_address);
+    assert(new_nullifier == nullifier);
 }
 
 #[test]
@@ -40,4 +47,29 @@ fn test_my_custom_tree() {
     let root = compute_merkle_root(leaf, path_indices, siblings);
 
     assert(root == 15403892286605756147578194685398955343522683323319211105324859804267310098432);
+}
+
+#[test]
+fn second_test_of_tree () {
+    let address_hash = 5183051201958097041725012313950661493034174345563299996802673928852370205491;
+    let hash_address_and_root = 14531852011562704607486210444841563301075362991437112684002327024424292549316;
+    let root = 5315311985295952189874264593624801356983822953672942664734663878120253370165;
+    let leaf = 875104119405993150068606213348716513669800294233369166449824781729692431728;
+    let siblings = [
+        15403892286605756147578194685398955343522683323319211105324859804267310098432,
+        8995896153219992062710898675021891003404871425075198597897889079729967997688,
+        15126246733515326086631621937388047923581111613947275249184377560170833782629,
+        6404200169958188928270149728908101781856690902670925316782889389790091378414,
+        17903822129909817717122288064678017104411031693253675943446999432073303897479,
+        11423673436710698439362231088473903829893023095386581732682931796661338615804,
+        10494842461667482273766668782207799332467432901404302674544629280016211342367,
+        17400501067905286947724900644309270241576392716005448085614420258732805558809
+    ];
+    let path_indices = [0, 0, 0, 0, 0, 0, 0, 0];
+
+    let root = compute_merkle_root(leaf, path_indices, siblings);
+    assert(root == 5315311985295952189874264593624801356983822953672942664734663878120253370165);
+
+    let new_nullifier = hash_root_with_nullifier(root, address_hash);
+    assert(new_nullifier == hash_address_and_root);
 }
