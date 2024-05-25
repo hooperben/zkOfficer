@@ -29,9 +29,7 @@ const Button = ({
 };
 
 const Register = () => {
-  const [inputValue, setInputValue] = useState(
-    "0x51a1ec0d55aa607f8927cba091a66f4daf1f56caaee90dcdbad67b5cf4af8bd54ea4ba85b49bda9b8de08c9a0714611449bf8c74960f2307114942e26791ab991c"
-  );
+  const [inputValue, setInputValue] = useState("");
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
