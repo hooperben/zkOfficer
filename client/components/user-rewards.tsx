@@ -42,7 +42,7 @@ const UserRewards = () => {
         <Tile
           imageSrc="/human-proof.webp"
           title="Digital Proof of Your Credentials"
-          description="Prove you have a valid registration, without revealing your personal information"
+          description="Prove you have a valid credential registered, without revealing your personal information."
           buttonText="Generate Proof"
           onButtonClick={() => setQROpen(true)}
         />
@@ -50,7 +50,7 @@ const UserRewards = () => {
         <Tile
           imageSrc="/human.webp"
           title="Anti Sybil AirDrop Claim"
-          description="Claim your Sybil Drop rewards for being a (somewhat) verified human, while remaining anonymous."
+          description="Claim your Sybil Drop rewards for being a verified human, while remaining anonymous."
           buttonText="Claim Now"
           onButtonClick={generateProof}
         />
