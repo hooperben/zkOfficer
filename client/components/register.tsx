@@ -39,15 +39,15 @@ const Register = () => {
   const isSigValid = inputValue.length > 32;
   const isNameValid = firstName.length > 0 && lastName.length > 0;
 
-  const handleChange = (event) => {
+  const handleChange = (event: any) => {
     setInputValue(event.target.value);
   };
 
-  const handleFNChange = (event) => {
+  const handleFNChange = (event: any) => {
     setFirstName(event.target.value);
   };
 
-  const handleLNChange = (event) => {
+  const handleLNChange = (event: any) => {
     setLastName(event.target.value);
   };
 
