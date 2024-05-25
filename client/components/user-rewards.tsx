@@ -50,7 +50,7 @@ const UserRewards = () => {
         <Tile
           imageSrc="/human.webp"
           title="Anti Sybil AirDrop Claim"
-          description="Claim your Sybil Drop rewards for being a verified human, while remaining anonymous."
+          description="Claim an airdrop as a verified human, while keeping your human identity anonymous."
           buttonText="Claim Now"
           onButtonClick={generateProof}
         />
