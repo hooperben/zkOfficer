@@ -56,8 +56,8 @@ const Register = () => {
 
       <div className="mb-4">
         <label htmlFor="inputField" className="block font-bold text-md mb-2">
-          Please enter your signed identity proof (this would be NFC if apple
-          weren&apos;t dogs).
+          Please enter your signed identity proof (this should be an NFC scan,
+          but apple stinks).
         </label>
         <input
           type="text"

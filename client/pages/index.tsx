@@ -1,6 +1,7 @@
 "use client";
 
 import Header from "@/components/header";
+import HowItWorks from "@/components/how-it-works";
 import Register from "@/components/register";
 import UserRewards from "@/components/user-rewards";
 import Head from "next/head";
@@ -19,6 +20,7 @@ export default function Home() {
         <Header />
         <Register />
         <UserRewards />
+        <HowItWorks />
       </main>
     </>
   );
