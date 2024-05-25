@@ -20,7 +20,7 @@ const Tile = ({
       </div>
       <div className="px-6 py-4 flex items-center justify-center">
         <LoadingButton
-          onClick={() => console.log("hello")}
+          onClick={onButtonClick}
           isLoading={false}
           isDisabled={userSecret === ""}
         >

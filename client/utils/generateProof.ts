@@ -2,9 +2,10 @@ import { compile, createFileManager } from "@noir-lang/noir_wasm";
 import { CompiledCircuit } from "@noir-lang/types";
 import { ensurePoseidon, poseidonHash, poseidonHash2 } from "../utils/poseidon";
 import { MerkleTree } from "fixed-merkle-tree";
-
 import { Noir } from "@noir-lang/noir_js";
 import { BarretenbergBackend } from "@noir-lang/backend_barretenberg";
+import { AbiCoder } from "ethers";
+import NonSybilERC20 from "../deployments/sepolia/NonSybilERC20.json";
 
 export async function getCircuit() {
   const fm = createFileManager("/");
@@ -27,24 +28,36 @@ export async function getCircuit() {
   return result.program as CompiledCircuit;
 }
 
-export const generateProof = async () => {
+export const generateProof = async (logs: any[]) => {
   await ensurePoseidon();
+
+  const decoder = new AbiCoder();
+
+  const formatted = logs.map((log) => {
+    const decodedBytes32 = decoder.decode(["bytes32"], log.topics[0]);
+    const decodedUint256 = decoder.decode(["uint256"], log.topics[1]);
+
+    return {
+      leaf: decodedBytes32.toString(),
+      leafIndex: decodedUint256.toString(),
+    };
+  });
 
   const circuit = await getCircuit();
 
-  // @ts-ignore
+  const leaves = formatted
+    .sort((a, b) => {
+      return Number(a.leafIndex) - Number(b.leafIndex);
+    })
+    .map((e) => {
+      return e.leafIndex.toString();
+    });
+
   const backend = new BarretenbergBackend(circuit, {
     threads: navigator.hardwareConcurrency,
   });
 
-  // @ts-ignore
   const noir = new Noir(circuit, backend);
-
-  const leaves: string[] = [
-    poseidonHash([
-      13780856135824609486835123660791248959181113742546918549559321242116770234576,
-    ]),
-  ];
 
   const tree = new MerkleTree(8, leaves, {
     hashFunction: poseidonHash2,
@@ -52,13 +65,23 @@ export const generateProof = async () => {
       "21663839004416932945382355908790599225266501822907911457504978515578255421292",
   });
 
-  const merkleProof = tree.proof(leaves[0]);
+  const addressAsPoseidon = poseidonHash([NonSybilERC20.address]);
+  const hashAddressAndRoot = poseidonHash([
+    BigInt(tree.root),
+    BigInt(addressAsPoseidon),
+  ]);
+
+  const merkleProof = tree.proof(leaves[2]);
   const input = {
     root: tree.root,
-    leaf: leaves[0],
+    leaf: leaves[2], // TODO this needs to not be hardcoded
     path_indices: merkleProof.pathIndices,
     siblings: merkleProof.pathElements,
+    nullifier: hashAddressAndRoot,
+    using_address: addressAsPoseidon,
   };
 
   const correctProof = await noir.generateProof(input);
+
+  return correctProof;
 };
