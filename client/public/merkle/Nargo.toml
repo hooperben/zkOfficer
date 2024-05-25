@@ -1,0 +1,7 @@
+[package]
+name = "merkle"
+type = "bin"
+authors = ["ben, derya"]
+compiler_version = ">=0.29.0"
+
+[dependencies]
