@@ -13,9 +13,14 @@
     "ethers": "^6.12.1",
     "next": "14.2.3",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "@noir-lang/backend_barretenberg": "^0.25.0",
+    "@noir-lang/noir_js": "^0.25.0",
+    "@noir-lang/noir_wasm": "^0.25.0",
+    "@noir-lang/types": "^0.25.0"
   },
   "devDependencies": {
+    "@types/circomlibjs": "^0.1.6",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
