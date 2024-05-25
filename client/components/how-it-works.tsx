@@ -10,7 +10,9 @@ const HowItWorks = () => (
 
     <Text>
       zk0fficer allows for reusing and validation of existing digital
-      credentials, while keeping your credentials private.
+      credentials, while keeping your credentials private. You can present your
+      credentials to the zk0fficer, and they can validate their legitimacy,
+      without knowing anything about them.
     </Text>
 
     <Text>
@@ -39,21 +41,22 @@ const HowItWorks = () => (
 
     <Text>
       That was then hashed, then signed by a secret that only an authority could
-      know. However, John has his signed message, his first and last name, he
-      can actually take this message, and prove he knows the steps to recreate
-      the hash, before it was signed by the authority.
+      know. However, since John has his signed message, and his first and last
+      name (the message contents), he can actually take this message, and prove
+      he knows the steps to recreate the hash, up to the point before it was
+      signed by the authority.
     </Text>
 
     <Text>
       zk0fficer works by taking Johns steps to recreate his hash, proves it
       checks out (validates that the authorities signature is valid), and if it
       does, creates a public encrypted record for everyone to see, that only
-      John can decrypt and use.
+      John can then decrypt and use.
     </Text>
 
     <Text>
       Using the wizardry of Zero Knowledge proofs, now that there is a public
-      encrypted record, John can prove his existence of his encrypted record,
+      encrypted record, John can prove the existence of his encrypted record,
       without revealing anything about the record itself.
     </Text>
 
@@ -74,10 +77,40 @@ const HowItWorks = () => (
         rel="noopener noreferrer"
         className="text-blue-500 hover:text-blue-700 font-semibold underline"
       >
-        data safety you have to trust
+        data safety standards you have to trust
       </a>
       . With tools like zk0fficer, you are closer to being able to prove your
       identity, without revealing any of your more personal data.
+    </Text>
+
+    <div className="mb-[40px]" />
+
+    <div className="font-bold text-xl">Project Details</div>
+
+    <Divider />
+
+    <Text>
+      This project was built as part of{" "}
+      <a
+        href="https://ethberlin.org/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-500 hover:text-blue-700 font-semibold underline"
+      >
+        ETH Berlin 4
+      </a>
+      , where the theme was &apos;Identity Crisis&apos;.
+    </Text>
+    <Text>
+      The source code is available in the Github{" "}
+      <a
+        href="https://github.com/hooperben/zkOfficer"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-500 hover:text-blue-700 font-semibold underline"
+      >
+        here.
+      </a>
     </Text>
   </div>
 );

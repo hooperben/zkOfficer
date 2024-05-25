@@ -1,4 +1,6 @@
 import Image from "next/image";
+import LoadingButton from "./button";
+import useStore from "@/hooks/useStore";
 
 const Tile = ({
   imageSrc,
@@ -7,6 +9,8 @@ const Tile = ({
   buttonText,
   onButtonClick,
 }: any) => {
+  const { userSecret } = useStore();
+
   return (
     <div className="m-1 rounded overflow-hidden shadow-lg bg-grey w-[300px]">
       <Image src={imageSrc} alt={title} width={300} height={300} />
@@ -15,12 +19,13 @@ const Tile = ({
         <p className="text-gray-700 text-base">{description}</p>
       </div>
       <div className="px-6 py-4 flex items-center justify-center">
-        <button
-          onClick={onButtonClick}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        <LoadingButton
+          onClick={() => console.log("hello")}
+          isLoading={false}
+          isDisabled={userSecret === ""}
         >
           {buttonText}
-        </button>
+        </LoadingButton>
       </div>
     </div>
   );

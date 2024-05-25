@@ -1,21 +1,39 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { ethers, keccak256, verifyMessage } from "ethers";
+import { JsonRpcProvider, ethers, keccak256, verifyMessage } from "ethers";
 import { AbiCoder } from "ethers";
 import type { NextApiRequest, NextApiResponse } from "next";
 
-type Data = {
-  result: boolean;
-  message: string;
-};
+import RegistryContract from "../../deployments/sepolia/Registry.json";
+import { Registry } from "@/typechain-types/Registry";
+import { ensurePoseidon, poseidonHash } from "@/utils/poseidon";
+import { Network } from "ethers";
+
+type Data =
+  | {
+      result: boolean;
+      message: string;
+    }
+  | {
+      txHash: string;
+    };
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
   if (req.method === "POST") {
-    const { firstName, lastName, hash } = req.body;
+    const { firstName, lastName, hash, usersHashedSecret } = req.body;
 
-    const signer = new ethers.Wallet(process.env.PRIVATE_KEY as string);
+    const network = new Network("sepolia", 11155111);
+    const provider = new JsonRpcProvider(
+      `https://sepolia.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      network,
+      { staticNetwork: network }
+    );
+    const signer = new ethers.Wallet(
+      process.env.PRIVATE_KEY as string,
+      provider
+    );
 
     // verify the message
     const recreatedEncodedMessage = AbiCoder.defaultAbiCoder().encode(
@@ -34,8 +52,29 @@ export default async function handler(
       res.status(401).json({ result: false, message: "Invalid signature" });
     }
 
+    const registryContract = new ethers.Contract(
+      RegistryContract.address,
+      RegistryContract.abi,
+      signer
+    ) as unknown as Registry;
+
+    await ensurePoseidon();
+    const newLeaf = poseidonHash([recreatedMessageHash, usersHashedSecret]);
+
+    const tx = await registryContract.addLeaf(
+      new AbiCoder().encode(["uint256"], [newLeaf])
+    );
+
+    const receipt = await tx.wait();
+
+    if (!receipt) {
+      return res
+        .status(400)
+        .json({ result: false, message: "nothing here sorry" });
+    }
+
     // Process a POST request
-    res.status(200).json({ result: true, message: "POST request" });
+    res.status(200).json({ txHash: receipt.hash });
   } else {
     res.status(404).json({ result: true, message: "nothing here sorry" });
   }
