@@ -9,7 +9,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>zkOfficer</title>
+        <title>zk0fficer</title>
         <meta
           name="description"
           content="digitally prove your physical documents"
