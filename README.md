@@ -15,7 +15,7 @@ without knowing anything about them.
 
 #### Registering a Credential
 
-![](https://ethberlin-81237t46r2387fg.s3.ap-southeast-2.amazonaws.com/REGISTER_WORKING.mov)
+https://ethberlin-81237t46r2387fg.s3.ap-southeast-2.amazonaws.com/REGISTER_WORKING.mov
 
 #### QR Code Generation of Credential Proof
 
