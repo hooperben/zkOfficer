@@ -90,16 +90,56 @@ const HowItWorks = () => (
     <Divider />
 
     <Text>
-      This project was built as part of{" "}
+      Built by {` `}
+      <a
+        href="https://x.com/0xbenhooper"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-500 hover:text-blue-700 font-semibold underline"
+      >
+        Ben
+      </a>
+      {`, `}
+      <a
+        href="https://x.com/DeryaKarl"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-500 hover:text-blue-700 font-semibold underline"
+      >
+        Derya
+      </a>
+      {` `} and {` `}
+      <a
+        href="https://x.com/niklas_long"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-500 hover:text-blue-700 font-semibold underline"
+      >
+        Niklas
+      </a>
+      {` `} as part of{" "}
       <a
         href="https://ethberlin.org/"
         target="_blank"
         rel="noopener noreferrer"
         className="text-blue-500 hover:text-blue-700 font-semibold underline"
       >
-        ETH Berlin 4
+        ETHBerlin04
       </a>
       , where the theme was &apos;Identity Crisis&apos;.
+    </Text>
+    <Text>
+      For our Zero Knowledge proving system, we used the PLONK based circuit
+      system Noir, created by {` `}
+      <a
+        href="https://x.com/aztecnetwork"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-500 hover:text-blue-700 font-semibold underline"
+      >
+        Aztec
+      </a>
+      {`. `}
     </Text>
     <Text>
       The source code is available in the Github{" "}
