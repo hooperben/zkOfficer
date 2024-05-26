@@ -8,6 +8,7 @@ import { useMutation } from "@tanstack/react-query";
 import { getAddress } from "ethers";
 import QRCode from "react-qr-code";
 import useLeafInfo from "@/hooks/useLeafInfo";
+import useMintInfo from "@/hooks/useMintInfo";
 
 const UserRewards = () => {
   const [qrOpen, setQROpen] = useState(false);
@@ -15,9 +16,7 @@ const UserRewards = () => {
   const [address, setAddress] = useState("");
 
   const [rewardStatus, setRewardStatus] = useState("");
-
-  // TODO move to zustand
-  const [mintTx, setMintTx] = useState("");
+  const { mintTx, setMintTx } = useMintInfo();
 
   const { leafIndex } = useLeafInfo();
 
@@ -35,6 +34,7 @@ const UserRewards = () => {
     const response = await fetch("/api/get-history");
     const history = await response.json();
 
+    console.log(history);
     setRewardStatus("Generating proof...");
     const proof = await generateProof(history, parseInt(leafIndex[0]));
 
@@ -114,6 +114,10 @@ const UserRewards = () => {
     } catch (err) {
       console.error("Failed to copy text: ", err);
     }
+  };
+
+  const openNewTab = (url: string) => {
+    window.open(url, "_blank");
   };
 
   return (
@@ -247,8 +251,12 @@ const UserRewards = () => {
           imageSrc="/human.webp"
           title="Anti Sybil AirDrop Claim"
           description="Claim an airdrop as a verified human, while keeping your human identity anonymous."
-          buttonText="Claim Now"
-          onButtonClick={() => setClaimOpen(true)}
+          buttonText={mintTx !== "" ? "View Claim Tx" : "Claim Now"}
+          onButtonClick={
+            mintTx !== ""
+              ? () => openNewTab(`https://sepolia.etherscan.io/tx/${mintTx}`)
+              : () => setClaimOpen(true)
+          }
         />
       </div>
     </div>
