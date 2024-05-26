@@ -9,7 +9,7 @@ without knowing anything about them.
 
 - [protocol](./protocol): this directory contains the zk0fficer protocol and test suite. It is a hardhat project, that has a `noir` program within it that compiles to smart contracts that can be tested with the test suite. It also makes use of the noir TS libraries that allow for proof generation and verification within typescript.
 
--[client](./client/): this directory contains the code for the front end deployed at [zk-officer.vercel.app](https://zk-officer.vercel.app). This is a NextJS app that is deployed with vercel.
+- [client](./client/): this directory contains the code for the front end deployed at [zk-officer.vercel.app](https://zk-officer.vercel.app). This is a NextJS app that is deployed with vercel.
 
 ### Demo Videos
 
