@@ -79,16 +79,39 @@ const UserRewards = () => {
     const history = await response.json();
 
     setRewardStatus("Generating proof...");
-    const proof = await generateProof(history);
+    const proof = await generateProof(history, true);
 
     const formatted = btoa(String.fromCharCode(...Array.from(proof.proof)));
 
-    // TODO fix
-    const encodedProof = `https://localhost:3000?p=${formatted}`; // &i=${proof.publicInputs.join(
+    const domain = window.location.hostname.includes("vercel")
+      ? window.location.hostname //
+      : "http://localhost:3000";
+
+    const encodedProof = `${domain}?p=${formatted}&z=${proof.publicInputs[0]}`;
 
     setEncodedProof(encodedProof);
 
     setRewardStatus("");
+  };
+
+  const [message, setMessage] = useState<string | null>(null);
+
+  const showCopiedMessage = () => {
+    setMessage("Copied!");
+
+    // Clear the message after 2 seconds
+    setTimeout(() => {
+      setMessage(null);
+    }, 2000);
+  };
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(encodedProof);
+      showCopiedMessage();
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+    }
   };
 
   return (
@@ -99,6 +122,7 @@ const UserRewards = () => {
         isOpen={qrOpen}
         onClose={() => setQROpen(false)}
         title="QR Proof of Credentials"
+        isLarge
       >
         <div className="flex flex-col justify-center">
           {rewardStatus === "Generating proof..." && (
@@ -129,11 +153,33 @@ const UserRewards = () => {
         </div>
 
         {encodedProof && (
-          <QRCode
-            value={encodedProof}
-            size={300}
-            style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-          />
+          <div className="flex flex-col">
+            <div>
+              <p className="mb-4">
+                Show this QR code to prove you have a valid credential (without
+                revealing any of your details.)
+              </p>
+            </div>
+
+            <QRCode
+              value={encodedProof}
+              size={300}
+              style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+            />
+
+            <button
+              onClick={copyToClipboard}
+              className="mt-3 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Copy Link
+            </button>
+
+            {message && (
+              <div className="flex text-center mt-2 justify-center text-size-xs">
+                <p>{message}</p>
+              </div>
+            )}
+          </div>
         )}
       </Modal>
 

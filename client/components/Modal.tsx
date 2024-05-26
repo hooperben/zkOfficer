@@ -1,4 +1,4 @@
-const Modal = ({ isOpen, onClose, children, title }: any) => {
+const Modal = ({ isOpen, onClose, children, title, isLarge }: any) => {
   if (!isOpen) return null;
 
   return (
@@ -13,7 +13,11 @@ const Modal = ({ isOpen, onClose, children, title }: any) => {
             &times;
           </button>
         </div>
-        <div className="flex mt-4 justify-center items-center w-[400px] break-words">
+        <div
+          className={`flex mt-4 justify-center items-center w-[${
+            isLarge ? "500px" : "400px"
+          }] break-words`}
+        >
           {children}
         </div>
       </div>

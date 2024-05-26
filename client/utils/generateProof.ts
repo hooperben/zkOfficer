@@ -28,7 +28,26 @@ export async function getCircuit() {
   return result.program as CompiledCircuit;
 }
 
-export const generateProof = async (logs: any[]) => {
+export const idNullifier = () =>
+  poseidonHash(["0x38d932809A3642050ef2A83E96F59042BfCAB777"]);
+
+export const verifyIdProof = async (proof: Uint8Array, root: string) => {
+  console.log(proof);
+  await ensurePoseidon();
+
+  const circuit = await getCircuit();
+  const backend = new BarretenbergBackend(circuit, {
+    threads: navigator.hardwareConcurrency,
+  });
+  const noir = new Noir(circuit, backend);
+
+  return await noir.verifyProof({
+    proof: proof,
+    publicInputs: [root, idNullifier()],
+  });
+};
+
+export const generateProof = async (logs: any[], isIdProof?: boolean) => {
   await ensurePoseidon();
 
   const decoder = new AbiCoder();
@@ -65,7 +84,9 @@ export const generateProof = async (logs: any[]) => {
       "21663839004416932945382355908790599225266501822907911457504978515578255421292",
   });
 
-  const addressAsPoseidon = poseidonHash([NonSybilERC20.address]);
+  const addressAsPoseidon = isIdProof
+    ? idNullifier()
+    : poseidonHash([NonSybilERC20.address]);
   const hashAddressAndRoot = poseidonHash([
     BigInt(tree.root),
     BigInt(addressAsPoseidon),
