@@ -6,6 +6,7 @@ import useStore from "@/hooks/useStore";
 import { useMutation } from "@tanstack/react-query";
 import { getRandomBigInt } from "@/utils/getRandom";
 import { ensurePoseidon, poseidonHash } from "@/utils/poseidon";
+import useLeafInfo from "@/hooks/useLeafInfo";
 
 const Register = () => {
   const [inputValue, setInputValue] = useState("");
@@ -13,6 +14,7 @@ const Register = () => {
   const [lastName, setLastName] = useState("");
 
   const { userSecret, setUserSecret } = useStore();
+  const { setLeafIndex } = useLeafInfo();
 
   const submitRegister = async (): Promise<{
     txHash: string;
@@ -36,7 +38,11 @@ const Register = () => {
 
     setUserSecret(secret.toString());
 
-    return response.json();
+    const data = await response.json();
+
+    setLeafIndex(data.leafIndex);
+
+    return data;
   };
 
   const { mutateAsync, isPending } = useMutation({

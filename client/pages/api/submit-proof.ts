@@ -15,6 +15,7 @@ type Data =
     }
   | {
       txHash: string;
+      leafIndex: string;
     };
 
 export default async function handler(
@@ -61,8 +62,10 @@ export default async function handler(
     await ensurePoseidon();
     const newLeaf = poseidonHash([recreatedMessageHash, usersHashedSecret]);
 
+    const abiCoder = new AbiCoder();
+
     const tx = await registryContract.addLeaf(
-      new AbiCoder().encode(["uint256"], [newLeaf])
+      abiCoder.encode(["uint256"], [newLeaf])
     );
 
     const receipt = await tx.wait();
@@ -73,8 +76,14 @@ export default async function handler(
         .json({ result: false, message: "nothing here sorry" });
     }
 
+    const { logs } = receipt;
+
     // Process a POST request
-    res.status(200).json({ txHash: receipt.hash });
+    res.status(200).json({
+      txHash: receipt.hash,
+      // @ts-ignore
+      leafIndex: [BigInt(logs[0].topics[1]).toString()],
+    });
   } else {
     res.status(404).json({ result: true, message: "nothing here sorry" });
   }

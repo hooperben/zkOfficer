@@ -4,20 +4,22 @@ import { useState } from "react";
 import Tile from "./tile";
 import Modal from "./Modal";
 import LoadingButton from "./button";
-import useStore from "@/hooks/useStore";
 import { useMutation } from "@tanstack/react-query";
 import { getAddress } from "ethers";
 import QRCode from "react-qr-code";
+import useLeafInfo from "@/hooks/useLeafInfo";
 
 const UserRewards = () => {
   const [qrOpen, setQROpen] = useState(false);
   const [claimOpen, setClaimOpen] = useState(false);
   const [address, setAddress] = useState("");
-  const { userSecret } = useStore();
 
   const [rewardStatus, setRewardStatus] = useState("");
 
+  // TODO move to zustand
   const [mintTx, setMintTx] = useState("");
+
+  const { leafIndex } = useLeafInfo();
 
   const handleChange = (event: any) => {
     setAddress(event.target.value);
@@ -34,9 +36,9 @@ const UserRewards = () => {
     const history = await response.json();
 
     setRewardStatus("Generating proof...");
-    const proof = await generateProof(history);
+    const proof = await generateProof(history, parseInt(leafIndex[0]));
 
-    console.log(proof);
+    console.log("proof", proof);
 
     setRewardStatus("Processing your transaction...");
     const submitRepose = await fetch("/api/submit-tx", {
@@ -45,14 +47,14 @@ const UserRewards = () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        proof: btoa(String.fromCharCode(...Array.from(proof.proof))), // proof.proof,
+        proof: btoa(String.fromCharCode(...Array.from(proof.proof))),
         address: address,
         publicInputs: proof.publicInputs,
       }),
     });
     const data = await submitRepose.json();
-    setRewardStatus("");
 
+    setRewardStatus("");
     setMintTx(data.txHash);
 
     return history;
@@ -79,7 +81,7 @@ const UserRewards = () => {
     const history = await response.json();
 
     setRewardStatus("Generating proof...");
-    const proof = await generateProof(history, true);
+    const proof = await generateProof(history, parseInt(leafIndex[0]), true);
 
     const formatted = btoa(String.fromCharCode(...Array.from(proof.proof)));
 

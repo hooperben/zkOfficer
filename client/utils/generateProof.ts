@@ -47,7 +47,11 @@ export const verifyIdProof = async (proof: Uint8Array, root: string) => {
   });
 };
 
-export const generateProof = async (logs: any[], isIdProof?: boolean) => {
+export const generateProof = async (
+  logs: any[],
+  userLeafIndex: number,
+  isIdProof?: boolean
+) => {
   await ensurePoseidon();
 
   const decoder = new AbiCoder();
@@ -92,10 +96,10 @@ export const generateProof = async (logs: any[], isIdProof?: boolean) => {
     BigInt(addressAsPoseidon),
   ]);
 
-  const merkleProof = tree.proof(leaves[2]);
+  const merkleProof = tree.proof(leaves[userLeafIndex]);
   const input = {
     root: tree.root,
-    leaf: leaves[2], // TODO this needs to not be hardcoded
+    leaf: leaves[userLeafIndex],
     path_indices: merkleProof.pathIndices,
     siblings: merkleProof.pathElements,
     nullifier: hashAddressAndRoot,

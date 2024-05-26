@@ -5,7 +5,7 @@ import { useState } from "react";
 import Modal from "./Modal";
 
 const Header = () => {
-  const { userSecret } = useStore();
+  const { userSecret, setUserSecret } = useStore();
 
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -37,6 +37,18 @@ const Header = () => {
         <Image src="/zkOfficer.webp" alt="zkOfficer" width={150} height={150} />
         <h1 className=" ml-[-20px] mt-[60px] text-xl font-mono">zk0fficer</h1>
       </div>
+
+      {/* {userSecret !== "" && (
+        <div className="mt-12">
+          <LoadingButton
+            onClick={() => setUserSecret("")}
+            isLoading={false}
+            isDisabled={false}
+          >
+            Clear Secret
+          </LoadingButton>
+        </div>
+      )} */}
 
       {userSecret !== "" && (
         <div className="mt-12">
