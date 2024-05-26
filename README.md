@@ -19,4 +19,8 @@ https://ethberlin-81237t46r2387fg.s3.ap-southeast-2.amazonaws.com/REGISTER_WORKI
 
 #### QR Code Generation of Credential Proof
 
+https://ethberlin-81237t46r2387fg.s3.ap-southeast-2.amazonaws.com/QR_PROOF.mov
+
 #### Token Claim with Proof
+
+https://ethberlin-81237t46r2387fg.s3.ap-southeast-2.amazonaws.com/TOKEN_CLAIM.mov
