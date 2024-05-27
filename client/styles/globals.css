@@ -16,9 +16,15 @@
   }
 }
 
+html {
+  width: 100vw;
+}
+
 body {
   background: "#D0D7E5";
   font: "mono";
+  /* width: 100%; */
+  min-width: 100vh;
 }
 
 @layer utilities {

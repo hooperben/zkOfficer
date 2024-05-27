@@ -52,7 +52,9 @@ export default function Home() {
           content="digitally prove your physical documents"
         />
       </Head>
-      <main className={`flex min-h-screen flex-col justify-between p-12`}>
+      <main
+        className={`flex min-h-screen flex-col justify-between p-12 w-[100%]`}
+      >
         <Header />
         <Register />
         <UserRewards />
