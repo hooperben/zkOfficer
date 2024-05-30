@@ -4,7 +4,7 @@ import { ensurePoseidon, poseidonHash, poseidonHash2 } from "../utils/poseidon";
 import { MerkleTree } from "fixed-merkle-tree";
 import { Noir } from "@noir-lang/noir_js";
 import { BarretenbergBackend } from "@noir-lang/backend_barretenberg";
-import { AbiCoder } from "ethers";
+import { AbiCoder, keccak256 } from "ethers";
 import NonSybilERC20 from "../deployments/sepolia/NonSybilERC20.json";
 
 export async function getCircuit() {
@@ -50,6 +50,8 @@ export const verifyIdProof = async (proof: Uint8Array, root: string) => {
 export const generateProof = async (
   logs: any[],
   userLeafIndex: number,
+  username: string,
+  userSecret: string,
   isIdProof?: boolean
 ) => {
   await ensurePoseidon();
@@ -73,7 +75,7 @@ export const generateProof = async (
       return Number(a.leafIndex) - Number(b.leafIndex);
     })
     .map((e) => {
-      return e.leafIndex.toString();
+      return e.leaf;
     });
 
   const backend = new BarretenbergBackend(circuit, {
@@ -88,23 +90,43 @@ export const generateProof = async (
       "21663839004416932945382355908790599225266501822907911457504978515578255421292",
   });
 
-  const addressAsPoseidon = isIdProof
-    ? idNullifier()
-    : poseidonHash([NonSybilERC20.address]);
-  const hashAddressAndRoot = poseidonHash([
-    BigInt(tree.root),
-    BigInt(addressAsPoseidon),
-  ]);
+  const encodedMessage = AbiCoder.defaultAbiCoder().encode(
+    ["string"],
+    [username]
+  );
+
+  const messageHash = (
+    BigInt(keccak256(encodedMessage)) %
+    BigInt(
+      "21888242871839275222246405745257275088548364400416034343698204186575808495617"
+    )
+  ).toString();
+
+  const verifyingParty = isIdProof
+    ? "0x38d932809A3642050ef2A83E96F59042BfCAB777"
+    : NonSybilERC20.address;
+
+  const hashedUserSecret = poseidonHash([userSecret]);
+
+  const newLeaf = poseidonHash([messageHash, hashedUserSecret]);
+
+  const hashedLeaf = poseidonHash([newLeaf]);
+
+  const nullifier = poseidonHash([hashedLeaf, verifyingParty]);
 
   const merkleProof = tree.proof(leaves[userLeafIndex]);
+
   const input = {
     root: tree.root,
-    leaf: leaves[userLeafIndex],
+    verifying_party: verifyingParty,
+    nullifier,
+    user_secret: userSecret.toString(),
+    user_hash: messageHash,
     path_indices: merkleProof.pathIndices,
     siblings: merkleProof.pathElements,
-    nullifier: hashAddressAndRoot,
-    using_address: addressAsPoseidon,
   };
+
+  console.log(input);
 
   const correctProof = await noir.generateProof(input);
 

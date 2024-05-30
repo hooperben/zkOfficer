@@ -51,7 +51,7 @@ const HowItWorks = () => (
 
     <Text>So what&apos;s all this &apos;zk&apos; stuff?</Text>
 
-    <Text>
+    <div className="mb-4 italic">
       From{" "}
       <a
         href="https://en.wikipedia.org/wiki/Zero-knowledge_proof"
@@ -61,20 +61,18 @@ const HowItWorks = () => (
       >
         wikipedia:
       </a>{" "}
-      <p className="italic">
-        In cryptography, a zero-knowledge proof or zero-knowledge protocol is a
-        method by which one party (the prover) can prove to another party (the
-        verifier) that a given statement is true, while avoiding conveying to
-        the verifier any information beyond the mere fact of the
-        statement&apos;s truth.
-      </p>
-    </Text>
+      In cryptography, a zero-knowledge proof or zero-knowledge protocol is a
+      method by which one party (the prover) can prove to another party (the
+      verifier) that a given statement is true, while avoiding conveying to the
+      verifier any information beyond the mere fact of the statement&apos;s
+      truth.
+    </div>
 
     <Text>
       The core premise of the zk0fficer is that only you know what user_secret
-      can be hashed to re-create the public record, and using the Wizardry of
+      can be hashed to re-create your public record, and using the Wizardry of
       Zero Knowledge proofs - you can prove that you know how to re-create this
-      public record, without revealing how.
+      public record, without revealing how, or which public record.
     </Text>
 
     <Text>
@@ -83,7 +81,7 @@ const HowItWorks = () => (
       public record of something, without revealing any details about it.
       However, the zk0fficer model can scale to any kind of data input -
       passports, licenses, memberships, subscriptions, tickets, whatever you
-      want - if it is a digital record, a zk0Officer is capable of checking
+      want. If it is a digital record, a zk0Officer is capable of checking
       it&apos;s validity - without publicly revealing anything about it.
     </Text>
 

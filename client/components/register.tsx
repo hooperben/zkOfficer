@@ -7,6 +7,7 @@ import { useMutation } from "@tanstack/react-query";
 import { getRandomBigInt } from "@/utils/getRandom";
 import { ensurePoseidon, poseidonHash } from "@/utils/poseidon";
 import useLeafInfo from "@/hooks/useLeafInfo";
+import useUsernameStore from "@/hooks/useUsernameStore";
 
 interface SubmitResponse {
   txHash?: string;
@@ -15,16 +16,14 @@ interface SubmitResponse {
 
 const Register = () => {
   const [inputValue, setInputValue] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-
   const { userSecret, setUserSecret } = useStore();
+  const { setUsername } = useUsernameStore();
   const { setLeafIndex } = useLeafInfo();
 
   const [error, setError] = useState<string>();
 
   const submitRegister = async (): Promise<SubmitResponse> => {
-    const secret = getRandomBigInt(256);
+    const secret = getRandomBigInt(252);
 
     await ensurePoseidon();
 
@@ -35,9 +34,7 @@ const Register = () => {
       },
       body: JSON.stringify({
         usersHashedSecret: poseidonHash([secret]),
-        firstName,
-        lastName,
-        hash: inputValue,
+        username: inputValue,
       }),
     });
 
@@ -46,6 +43,7 @@ const Register = () => {
 
       setUserSecret(secret.toString());
       setLeafIndex(data.leafIndex);
+      setUsername(inputValue);
 
       return data;
     }
@@ -93,8 +91,8 @@ const Register = () => {
         <>
           <h1 className="text-xl font-mono">Congratulations!</h1>
           <p className="mt-4">
-            You have a valid proof within the registry contract! You can now use
-            the features below!
+            You now have a valid zkLicense. See below how it works, and what you
+            can use it for.
           </p>
         </>
       )}

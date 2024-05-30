@@ -104,9 +104,6 @@ describe("Merkle Tree Testing", function () {
       )
     ).toString();
 
-    // TODO refactor to use this
-    const signedMessage = await Authority.signMessage(messageHash);
-
     // next the user generates their secret
     const secret =
       21088105314810073508975613344133470274112327938226801880624427918733235725102n; // getRandomBigInt(256);

@@ -9,6 +9,8 @@ import { getAddress } from "ethers";
 import QRCode from "react-qr-code";
 import useLeafInfo from "@/hooks/useLeafInfo";
 import useMintInfo from "@/hooks/useMintInfo";
+import useUsernameStore from "@/hooks/useUsernameStore";
+import useStore from "@/hooks/useStore";
 
 const UserRewards = () => {
   const [qrOpen, setQROpen] = useState(false);
@@ -17,6 +19,8 @@ const UserRewards = () => {
 
   const [rewardStatus, setRewardStatus] = useState("");
   const { mintTx, setMintTx } = useMintInfo();
+  const { username } = useUsernameStore();
+  const { userSecret } = useStore();
 
   const { leafIndex } = useLeafInfo();
 
@@ -32,13 +36,22 @@ const UserRewards = () => {
 
     // we need to get the state of the tree (use back end endpoint)
     const response = await fetch("/api/get-history");
+
+    if (!response.ok) {
+      throw new Error("Error getting history :(");
+    }
     const history = await response.json();
 
     console.log(history);
-    setRewardStatus("Generating proof...");
-    const proof = await generateProof(history, parseInt(leafIndex[0]));
 
-    console.log("proof", proof);
+    setRewardStatus("Generating proof...");
+
+    const proof = await generateProof(
+      history,
+      parseInt(leafIndex[0]),
+      username,
+      userSecret
+    );
 
     setRewardStatus("Processing your transaction...");
     const submitRepose = await fetch("/api/submit-tx", {
@@ -83,11 +96,23 @@ const UserRewards = () => {
 
     // we need to get the state of the tree (use back end endpoint)
     const response = await fetch("/api/get-history");
+
+    if (!response.ok) {
+      throw new Error("Something went wrong :(");
+    }
     const history = await response.json();
 
-    setRewardStatus("Generating proof...");
-    const proof = await generateProof(history, parseInt(leafIndex[0]), true);
+    console.log(history);
 
+    setRewardStatus("Generating proof...");
+
+    const proof = await generateProof(
+      history,
+      parseInt(leafIndex[0]),
+      username,
+      userSecret,
+      true
+    );
     const formatted = btoa(String.fromCharCode(...Array.from(proof.proof)));
 
     const domain = window.location.hostname.includes("vercel")
@@ -245,23 +270,24 @@ const UserRewards = () => {
 
       <p className="mb-4">
         The zkOfficer is a public good that is hirable by any 3rd party (for
-        free!), so anyone can gate entry to their services based on whether or
-        not they have a valid zkLicense.
+        free!), so that anyone can gate entry to their services based on whether
+        or not they have a valid zkLicense.
       </p>
       <p className="mb-4">
         This allows the service owners to validate their users are authentic,
-        and allows users to not surrender any details they don&apos;t want to.
+        and allows users to not surrender any details they don&apos;t want to
+        (we&apos;ll elaborate on that a bit further down).
       </p>
       <p className="mb-4">
-        If you&apos;ve got a zkLicense, you can use it in a few different places
-        below:
+        If you&apos;ve got a zkLicense, you can currently use it in a few
+        different places below:
       </p>
 
       <div className="flex">
         <Tile
           imageSrc="/human-proof.webp"
           title="Digital Proof of Your Credentials"
-          description="Prove that you have a valid zkLicense, without revealing your username."
+          description="Generate a QR code that proves that you have a valid zkLicense, without revealing anything about you (well, your username)."
           buttonText="Generate Proof"
           onButtonClick={generateQRProof}
         />

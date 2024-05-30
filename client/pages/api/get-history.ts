@@ -1,12 +1,18 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
+import Registry from "../../deployments/sepolia/Registry.json";
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   if (req.method === "GET") {
     const response = await fetch(
-      `https://api-sepolia.etherscan.io/api?module=logs&action=getLogs&address=0x0387a50e31b63C27fa9971b7e46248484B4643E1&fromBlock=5976844&toBlock=6976844&page=1&offset=1000&apikey=${process.env.ETHERSCAN_API_KEY}`
+      `https://api-sepolia.etherscan.io/api?module=logs&action=getLogs&address=${
+        Registry.address
+      }&fromBlock=${Registry.receipt.blockNumber}&toBlock=${
+        Registry.receipt.blockNumber + 10000
+      }&page=1&offset=1000&apikey=${process.env.ETHERSCAN_API_KEY}`
     );
 
     const { result } = await response.json();

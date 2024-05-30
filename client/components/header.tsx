@@ -5,9 +5,11 @@ import { useState } from "react";
 import Modal from "./Modal";
 import useLeafInfo from "@/hooks/useLeafInfo";
 import useMintInfo from "@/hooks/useMintInfo";
+import useUsernameStore from "@/hooks/useUsernameStore";
 
 const Header = () => {
   const { userSecret, setUserSecret } = useStore();
+  const { username, setUsername } = useUsernameStore();
   const { leafIndex, setLeafIndex } = useLeafInfo();
   const { setMintTx } = useMintInfo();
 
@@ -33,6 +35,14 @@ const Header = () => {
           <div className="w-[100%]">
             <table className="w-full table-fixed border-collapse">
               <tbody>
+                <tr className="border-b align-top">
+                  <td className="break-words max-w-[200px] text-center font-bold p-2">
+                    Your username:
+                  </td>
+                  <td className="break-words max-w-[600px] text-center p-2">
+                    {username}
+                  </td>
+                </tr>
                 <tr className="border-b align-top">
                   <td className="break-words max-w-[200px] text-center font-bold p-2">
                     Your Secret:
@@ -91,6 +101,7 @@ const Header = () => {
                       setUserSecret("");
                       setModalOpen(false);
                       setMintTx("");
+                      setUsername("");
                     }}
                   >
                     Really Delete my Account

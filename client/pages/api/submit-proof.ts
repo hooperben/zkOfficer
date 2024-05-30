@@ -1,5 +1,5 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { JsonRpcProvider, ethers, keccak256, verifyMessage } from "ethers";
+import { JsonRpcProvider, ethers, keccak256 } from "ethers";
 import { AbiCoder } from "ethers";
 import type { NextApiRequest, NextApiResponse } from "next";
 
@@ -23,7 +23,7 @@ export default async function handler(
   res: NextApiResponse<Data>
 ) {
   if (req.method === "POST") {
-    const { firstName, lastName, hash, usersHashedSecret } = req.body;
+    const { username, usersHashedSecret } = req.body;
 
     const network = new Network("sepolia", 11155111);
     const provider = new JsonRpcProvider(
@@ -36,22 +36,20 @@ export default async function handler(
       provider
     );
 
+    await ensurePoseidon();
+
     // verify the message
-    const recreatedEncodedMessage = AbiCoder.defaultAbiCoder().encode(
-      ["string", "string"],
-      [firstName, lastName]
+    const encodedMessage = AbiCoder.defaultAbiCoder().encode(
+      ["string"],
+      [username]
     );
-    const recreatedMessageHash = keccak256(recreatedEncodedMessage);
 
-    // Recover the address
-    const recoveredAddress = verifyMessage(recreatedMessageHash, hash);
-
-    // Compare with the original signer's address
-    const signerAddress = await signer.getAddress();
-
-    if (recoveredAddress !== signerAddress) {
-      res.status(401).json({ result: false, message: "Invalid signature" });
-    }
+    const messageHash = (
+      BigInt(keccak256(encodedMessage)) %
+      BigInt(
+        "21888242871839275222246405745257275088548364400416034343698204186575808495617"
+      )
+    ).toString();
 
     const registryContract = new ethers.Contract(
       RegistryContract.address,
@@ -59,8 +57,7 @@ export default async function handler(
       signer
     ) as unknown as Registry;
 
-    await ensurePoseidon();
-    const newLeaf = poseidonHash([recreatedMessageHash, usersHashedSecret]);
+    const newLeaf = poseidonHash([messageHash, usersHashedSecret]);
 
     const abiCoder = new AbiCoder();
 
