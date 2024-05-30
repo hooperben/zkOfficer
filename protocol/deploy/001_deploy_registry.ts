@@ -33,7 +33,6 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     from: Deployer.address,
     log: true,
     autoMine: true,
-    waitConfirmations: 2,
   });
 
   const UltraVerifier = (await deployments.get("UltraVerifier")).address;
@@ -43,7 +42,6 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     args: [UltraVerifier, hasherAddress],
     log: true,
     autoMine: true,
-    waitConfirmations: 2,
   });
 
   // next we deploy our test ERC20 contract
@@ -52,7 +50,6 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     args: [UltraVerifier],
     log: true,
     autoMine: true,
-    waitConfirmations: 2,
   });
 };
 
