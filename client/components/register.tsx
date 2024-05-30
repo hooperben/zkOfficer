@@ -8,6 +8,11 @@ import { getRandomBigInt } from "@/utils/getRandom";
 import { ensurePoseidon, poseidonHash } from "@/utils/poseidon";
 import useLeafInfo from "@/hooks/useLeafInfo";
 
+interface SubmitResponse {
+  txHash?: string;
+  error?: string;
+}
+
 const Register = () => {
   const [inputValue, setInputValue] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -16,9 +21,9 @@ const Register = () => {
   const { userSecret, setUserSecret } = useStore();
   const { setLeafIndex } = useLeafInfo();
 
-  const submitRegister = async (): Promise<{
-    txHash: string;
-  }> => {
+  const [error, setError] = useState<string>();
+
+  const submitRegister = async (): Promise<SubmitResponse> => {
     const secret = getRandomBigInt(256);
 
     await ensurePoseidon();
@@ -36,13 +41,16 @@ const Register = () => {
       }),
     });
 
-    setUserSecret(secret.toString());
+    if (response.ok) {
+      const data = await response.json();
 
-    const data = await response.json();
+      setUserSecret(secret.toString());
+      setLeafIndex(data.leafIndex);
 
-    setLeafIndex(data.leafIndex);
+      return data;
+    }
 
-    return data;
+    return { error: "Your proof isn't valid, sorry brussy/brussette :(" };
   };
 
   const { mutateAsync, isPending } = useMutation({
@@ -50,8 +58,10 @@ const Register = () => {
     onError: (error) => {
       console.error(error);
     },
-    onSuccess: (data) => {
-      console.log(data);
+    onSuccess: (data: SubmitResponse) => {
+      if (data.error) {
+        setError(data.error);
+      }
     },
   });
 
@@ -75,7 +85,20 @@ const Register = () => {
       <div className="font-bold text-xl">Register</div>
       <Divider />
 
-      {userSecret !== "" ? (
+      {error && (
+        <>
+          <h1 className="text-xl font-mono">Something went wrong!</h1>
+          <p className="mt-4">{error}</p>
+
+          <div>
+            <LoadingButton onClick={() => setError(undefined)}>
+              Try again?
+            </LoadingButton>
+          </div>
+        </>
+      )}
+
+      {userSecret !== "" && (
         <>
           <h1 className="text-xl font-mono">Congratulations!</h1>
           <p className="mt-4">
@@ -83,7 +106,9 @@ const Register = () => {
             the features below!
           </p>
         </>
-      ) : (
+      )}
+
+      {userSecret === "" && !error && (
         <>
           <div className="mb-4">
             <label
