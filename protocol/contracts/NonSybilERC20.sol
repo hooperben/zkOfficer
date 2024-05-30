@@ -22,9 +22,13 @@ contract NonSybilERC20 is ERC20, ERC20Permit {
         bytes calldata _proof,
         bytes32[] calldata _publicInputs
     ) public {
-        require(!nullifiers[_publicInputs[1]], "Nullifier used");
+        require(!nullifiers[_publicInputs[2]], "Nullifier used");
         require(verifier.verify(_proof, _publicInputs), "Invalid proof");
-        nullifiers[_publicInputs[1]] = true;
+
+        // mark the nullifier as used
+        nullifiers[_publicInputs[2]] = true;
+
+        // mint the token to the user
         _mint(to, 100e18);
     }
 }

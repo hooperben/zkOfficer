@@ -58,7 +58,7 @@ describe("Merkle Tree Testing", function () {
   let circuit: CompiledCircuit;
   let noir: Noir;
 
-  before("hello", async () => {
+  before("set up", async () => {
     await deployments.fixture("testbed");
 
     [Authority, Deployer, SybilTokenReceiver] = await ethers.getSigners();
@@ -67,9 +67,7 @@ describe("Merkle Tree Testing", function () {
 
     circuit = await getCircuit();
 
-    // @ts-ignore
     const backend = new BarretenbergBackend(circuit);
-    // @ts-ignore
     noir = new Noir(circuit, backend);
 
     const registryDeployment = await hre.deployments.get("Registry");
@@ -87,7 +85,8 @@ describe("Merkle Tree Testing", function () {
     ) as unknown as NonSybilERC20;
   });
 
-  it("should run with a pre stocked tree", async () => {
+  it("should let a user with an encrypted record within the tree use it", async () => {
+    // first we create our users message hash
     const message = {
       firstname: "John",
       lastname: "Doe",
@@ -96,12 +95,27 @@ describe("Merkle Tree Testing", function () {
       ["string", "string"],
       [message.firstname, message.lastname]
     );
-    const messageHash = keccak256(encodedMessage);
+
+    // we wrap our message hash in the bounds of the merkle limits
+    const messageHash = (
+      BigInt(keccak256(encodedMessage)) %
+      BigInt(
+        "21888242871839275222246405745257275088548364400416034343698204186575808495617"
+      )
+    ).toString();
+
+    // TODO refactor to use this
     const signedMessage = await Authority.signMessage(messageHash);
 
-    // a user would submit the message + that signed message + some hash of some randomness
-    const userUsersNewSecret = poseidonHash([getRandomBigInt(256)]);
-    const newLeaf = poseidonHash([signedMessage, userUsersNewSecret]);
+    // next the user generates their secret
+    const secret =
+      21088105314810073508975613344133470274112327938226801880624427918733235725102n; // getRandomBigInt(256);
+
+    // and hashes it
+    const hashedUserSecret = poseidonHash([secret]);
+
+    // an admin inserts the hash + hash(hashedUserSecret)
+    const newLeaf = poseidonHash([messageHash, hashedUserSecret]);
 
     // add the leaf to the tree
     const abi = new AbiCoder();
@@ -120,31 +134,34 @@ describe("Merkle Tree Testing", function () {
         return Number(a.args?.leafIndex) - Number(b.args?.leafIndex);
       })
       .map((e) => {
-        return e.args?.indexedleaf.toString();
+        return BigInt(e.args?.indexedleaf).toString();
       });
 
-    // construct the tree
+    // construct the tree (the zero element is the root set in the MerkleTreeWithHistory constructor)
     const tree = new MerkleTree(8, leaves, {
       hashFunction: poseidonHash2,
       zeroElement:
         "21663839004416932945382355908790599225266501822907911457504978515578255421292",
     });
 
-    const addressAsPoseidon = poseidonHash([await registry.getAddress()]);
-    const hashAddressAndRoot = poseidonHash([
-      BigInt(tree.root),
-      BigInt(addressAsPoseidon),
-    ]);
+    // next we constructor our nullifier
+    const verifyingParty = "0x405338F496D665C821518107895F0b9639Fde789";
+    const hashedLeaf = poseidonHash([newLeaf]);
+    const nullifier = poseidonHash([hashedLeaf, verifyingParty]);
 
-    const test = tree.proof(leaves[0]);
+    // get our merkle proof
+    const merkleProof = tree.proof(leaves[0]);
+
     const input = {
       root: tree.root,
-      nullifier: hashAddressAndRoot,
-      using_address: addressAsPoseidon,
-      leaf: leaves[0],
-      path_indices: test.pathIndices,
-      siblings: test.pathElements,
+      verifying_party: verifyingParty,
+      nullifier,
+      user_secret: secret.toString(),
+      user_hash: messageHash,
+      path_indices: merkleProof.pathIndices,
+      siblings: merkleProof.pathElements,
     };
+
     // Generate proof
     const correctProof = await noir.generateProof(input);
 
@@ -153,19 +170,18 @@ describe("Merkle Tree Testing", function () {
     ).to.equal(true);
 
     // NOW LETS MINT A TOKEN WITH OUR PROOF
-    const sybilAddressAsHash = poseidonHash([await registry.getAddress()]);
-    const hashSybilAddressAndRoot = poseidonHash([
-      BigInt(tree.root),
-      BigInt(addressAsPoseidon),
-    ]);
+
+    const erc20UsingAddress = await nonSybilERC20.getAddress();
+    const mintNullifier = poseidonHash([hashedLeaf, erc20UsingAddress]);
 
     const mintInput = {
       root: tree.root,
-      nullifier: hashSybilAddressAndRoot,
-      using_address: sybilAddressAsHash,
-      leaf: leaves[0],
-      path_indices: test.pathIndices,
-      siblings: test.pathElements,
+      verifying_party: erc20UsingAddress,
+      nullifier: mintNullifier,
+      user_secret: secret.toString(),
+      user_hash: messageHash,
+      path_indices: merkleProof.pathIndices,
+      siblings: merkleProof.pathElements,
     };
 
     const mintProof = await noir.generateProof(mintInput);
@@ -183,25 +199,15 @@ describe("Merkle Tree Testing", function () {
     );
 
     expect(balanceAfter).to.greaterThan(balanceBefore);
-  });
 
-  it("Test Signatures", async () => {
-    const message = {
-      firstname: "John",
-      lastname: "Doe",
-    };
+    // if we resubmit - we should not be able to claim more than once
 
-    const encodedMessage = AbiCoder.defaultAbiCoder().encode(
-      ["string", "string"],
-      [message.firstname, message.lastname]
-    );
-    const messageHash = keccak256(encodedMessage);
-    const signedMessage = await Authority.signMessage(messageHash);
-
-    // a user would submit the message + that signed message + some hash of some randomness
-    const userUsersNewSecret = poseidonHash([getRandomBigInt(256)]);
-    const newLeaf = poseidonHash([signedMessage, userUsersNewSecret]);
-
-    console.log("newLeaf", newLeaf);
+    await expect(
+      nonSybilERC20.mint(
+        SybilTokenReceiver.address,
+        mintProof.proof,
+        mintProof.publicInputs
+      )
+    ).to.be.rejected;
   });
 });
