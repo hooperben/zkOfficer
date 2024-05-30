@@ -65,24 +65,15 @@ const Register = () => {
     },
   });
 
-  const isSigValid = inputValue.length > 32;
-  const isNameValid = firstName.length > 2 && lastName.length > 2;
+  const isSigValid = inputValue.length > 2 && inputValue.length < 20;
 
   const handleChange = (event: any) => {
     setInputValue(event.target.value);
   };
 
-  const handleFNChange = (event: any) => {
-    setFirstName(event.target.value);
-  };
-
-  const handleLNChange = (event: any) => {
-    setLastName(event.target.value);
-  };
-
   return (
     <div className="bg-[#D0D7E5] mb-[50px]">
-      <div className="font-bold text-xl">Register</div>
+      <div className="font-bold text-xl">Register Your zkLicense</div>
       <Divider />
 
       {error && (
@@ -111,68 +102,48 @@ const Register = () => {
       {userSecret === "" && !error && (
         <>
           <div className="mb-4">
+            <p>
+              A zkLicense is a record that the zkOfficer can inspect and verify
+              is real, without seeing anything about that record.
+            </p>
+          </div>
+          <div className="mb-4">
             <label
               htmlFor="inputField"
               className="block font-bold text-md mb-2"
             >
-              Please enter your signed identity proof (this should be an NFC
-              scan, but apple stinks).
+              <p>To create your zkLicense, enter a username:</p>
             </label>
             <input
               type="text"
               id="inputField"
               value={inputValue}
               onChange={handleChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
+
+            <div className="w-[60%] mt-2">
+              <p className="text-xs font-bold mb-1">Username rules:</p>
+              <ul className=" list-none pl-5 text-xs">
+                <li className="mb-1">1. Can be anything you want.</li>
+                <li className="mb-1">
+                  2. Has to be atleast 2 letters, and less than 30.
+                </li>
+                <li className="mb-1">
+                  3. Try not to put anything too personal (this is the
+                  internet).
+                </li>
+              </ul>
+            </div>
           </div>
 
-          {isSigValid && (
-            <div>
-              <div className="mb-4 w-[500px] flex flex-row">
-                <div className="flex flex-col">
-                  <label
-                    htmlFor="firstName"
-                    className="block font-bold text-md mb-2"
-                  >
-                    First Name
-                  </label>
-                  <input
-                    type="text"
-                    id="firstName"
-                    value={firstName}
-                    onChange={handleFNChange}
-                    className="w=[200px] shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                </div>
-
-                <div className="ml-2 flex flex-col">
-                  <label
-                    htmlFor="lastName"
-                    className="block font-bold text-md mb-2"
-                  >
-                    Last Name
-                  </label>
-                  <input
-                    type="text"
-                    id="lastName"
-                    value={lastName}
-                    onChange={handleLNChange}
-                    className="w=[200px] shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                </div>
-              </div>
-              <div className="mt-[30px]">
-                <LoadingButton
-                  onClick={mutateAsync}
-                  isLoading={isPending}
-                  isDisabled={!isNameValid || !isSigValid}
-                >
-                  Register
-                </LoadingButton>
-              </div>
-            </div>
-          )}
+          <LoadingButton
+            onClick={mutateAsync}
+            isLoading={isPending}
+            isDisabled={!isSigValid}
+          >
+            Get My zkLicense
+          </LoadingButton>
         </>
       )}
     </div>

@@ -52,6 +52,11 @@ const UserRewards = () => {
         publicInputs: proof.publicInputs,
       }),
     });
+
+    if (!submitRepose.ok) {
+      throw new Error("Something went wrong :(");
+    }
+
     const data = await submitRepose.json();
 
     setRewardStatus("");
@@ -122,7 +127,7 @@ const UserRewards = () => {
 
   return (
     <div className="mb-[50px]">
-      <div className="font-bold text-xl">Verified User Rewards</div>
+      <div className="font-bold text-xl">zkOfficer Inspection Points</div>
 
       <Modal
         isOpen={qrOpen}
@@ -238,11 +243,25 @@ const UserRewards = () => {
 
       <Divider />
 
+      <p className="mb-4">
+        The zkOfficer is a public good that is hirable by any 3rd party (for
+        free!), so anyone can gate entry to their services based on whether or
+        not they have a valid zkLicense.
+      </p>
+      <p className="mb-4">
+        This allows the service owners to validate their users are authentic,
+        and allows users to not surrender any details they don&apos;t want to.
+      </p>
+      <p className="mb-4">
+        If you&apos;ve got a zkLicense, you can use it in a few different places
+        below:
+      </p>
+
       <div className="flex">
         <Tile
           imageSrc="/human-proof.webp"
           title="Digital Proof of Your Credentials"
-          description="Prove you have a valid credential registered, without revealing your personal information."
+          description="Prove that you have a valid zkLicense, without revealing your username."
           buttonText="Generate Proof"
           onButtonClick={generateQRProof}
         />
@@ -250,7 +269,7 @@ const UserRewards = () => {
         <Tile
           imageSrc="/human.webp"
           title="Anti Sybil AirDrop Claim"
-          description="Claim an airdrop as a verified human, while keeping your human identity anonymous."
+          description="Claim a one time token airdrop as a verified zkLicense holder, while keeping your username anonymous."
           buttonText={mintTx !== "" ? "View Claim Tx" : "Claim Now"}
           onButtonClick={
             mintTx !== ""

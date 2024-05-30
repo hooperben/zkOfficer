@@ -9,68 +9,88 @@ const HowItWorks = () => (
     <Divider />
 
     <Text>
-      zk0fficer allows for reusing and validation of existing digital
-      credentials, while keeping your credentials private. You can present your
-      credentials to the zk0fficer, and they can validate their legitimacy,
-      without knowing anything about them.
+      In this example implementation site, a user starts with a username. This
+      username is not currently uniquely enforced, meaning that there there
+      could for example be multiple usernames registered as &apos;John&apos; -
+      for this example, it doesn&apos;t really matter.
     </Text>
 
     <Text>
-      In this example implementation site, a user starts with a message that
-      they have signed by a central source. Here&apos;s an example:
+      What does matter though, is the random number that is generated when you
+      submit your username. If you have created your zkLicense, you can view
+      yours at the top of the page by clicking the &apos;My Account&apos;
+      button. If you haven&apos;t created one - what are you waiting for??
     </Text>
 
     <Text>
-      0x51a1ec0d55aa607f8927cba091a66f4daf1f56caaee90dcdbad67b5cf4af8bd54ea4ba8
-      5b49bda9b8de08c9a0714611449bf8c74960f2307114942e26791ab991c
+      Anyway, this random number is something that only you can know. It&apos;s
+      kind of like your password.
     </Text>
 
     <Text>
-      This does look like Gibberish, but it is actually a message that was once
-      human readable. This message was once a data record of:
+      When you submit your username, you send it to a public registry, in the
+      form:
+    </Text>
+
+    <p className="font-normal my-8">
+      my_public_record = hash(
+      <span className="font-extrabold">hash(user_secret)</span>, username)
+    </p>
+
+    <Text>
+      The hash function here is like a magic blender that takes any kind of
+      information, mixes it up, and (almost) always gives you a unique output.
     </Text>
 
     <Text>
-      {`
-      {
-        "firstname": "John",
-        "lastname": "Doe"
-      }
-      `}
+      An important property of hash functions is that they are one way. If you
+      blend something up, you can&apos;t unblend it up - there&apos;s no way to
+      see what was blended up to get your output (unless you know, unless
+      you&apos;re the one who blended it..).
+    </Text>
+
+    <Text>So what&apos;s all this &apos;zk&apos; stuff?</Text>
+
+    <Text>
+      From{" "}
+      <a
+        href="https://en.wikipedia.org/wiki/Zero-knowledge_proof"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-500 hover:text-blue-700 font-semibold underline"
+      >
+        wikipedia:
+      </a>{" "}
+      <p className="italic">
+        In cryptography, a zero-knowledge proof or zero-knowledge protocol is a
+        method by which one party (the prover) can prove to another party (the
+        verifier) that a given statement is true, while avoiding conveying to
+        the verifier any information beyond the mere fact of the
+        statement&apos;s truth.
+      </p>
     </Text>
 
     <Text>
-      That was then hashed, then signed by a secret that only an authority could
-      know. However, since John has his signed message, and his first and last
-      name (the message contents), he can actually take this message, and prove
-      he knows the steps to recreate the hash, up to the point before it was
-      signed by the authority.
+      The core premise of the zk0fficer is that only you know what user_secret
+      can be hashed to re-create the public record, and using the Wizardry of
+      Zero Knowledge proofs - you can prove that you know how to re-create this
+      public record, without revealing how.
     </Text>
 
     <Text>
-      zk0fficer works by taking Johns steps to recreate his hash, proves it
-      checks out (validates that the authorities signature is valid), and if it
-      does, creates a public encrypted record for everyone to see, that only
-      John can then decrypt and use.
+      Our zkLicense model on this demo site is very case specific and not all
+      that useful, it just demonstrates that you can prove that you have a
+      public record of something, without revealing any details about it.
+      However, the zk0fficer model can scale to any kind of data input -
+      passports, licenses, memberships, subscriptions, tickets, whatever you
+      want - if it is a digital record, a zk0Officer is capable of checking
+      it&apos;s validity - without publicly revealing anything about it.
     </Text>
 
     <Text>
-      Using the wizardry of Zero Knowledge proofs, now that there is a public
-      encrypted record, John can prove the existence of his encrypted record,
-      without revealing anything about the record itself.
-    </Text>
-
-    <Text>
-      Our example is very specific and not all that useful as anyone could know
-      Johns details in this simple model - however, the zk0fficer model can
-      scale to any kind of data input, and implement any kind digital signature
-      model (somewhat easily).
-    </Text>
-
-    <Text>
-      Whenever you currently need to verify your identity, chances are
-      you&apos;re taking a photo of your passport or drivers lisense, and
-      sending it off to a company whose{" "}
+      In the modern world, whenever you currently need to verify your identity,
+      chances are you&apos;re taking a photo of your passport or drivers
+      license, and sending it off to a company whose{" "}
       <a
         href="https://en.wikipedia.org/wiki/2022_Optus_data_breach"
         target="_blank"
@@ -79,8 +99,9 @@ const HowItWorks = () => (
       >
         data safety standards you have to trust
       </a>
-      . With tools like zk0fficer, you are closer to being able to prove your
-      identity, without revealing any of your more personal data.
+      . With tools like zk0fficer becoming more feasible and easier to build,
+      you are closer to being able to prove your identity, without revealing any
+      of your more personal data than you need to.
     </Text>
 
     <div className="mb-[40px]" />
