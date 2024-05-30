@@ -17,6 +17,7 @@ contract NonSybilERC20 is ERC20, ERC20Permit {
         verifier = UltraVerifier(_verifier);
     }
 
+    // TODO make this unfront-runnable, but thats a later problem
     function mint(
         address to,
         bytes calldata _proof,
