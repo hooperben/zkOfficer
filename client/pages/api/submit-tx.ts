@@ -16,6 +16,11 @@ const base64ToUint8Array = (base64: string): Uint8Array => {
   return uint8Array;
 };
 
+// This function can run for a maximum of 5 seconds
+export const config = {
+  maxDuration: 25,
+};
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
