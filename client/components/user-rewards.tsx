@@ -100,7 +100,7 @@ const UserRewards = () => {
   const generateQRProof = async () => {
     setQROpen(true);
 
-    if (path === "") return;
+    if (path !== "") return;
 
     // we need to get the state of the tree (use back end endpoint)
     const response = await fetch("/api/get-history");
@@ -146,7 +146,6 @@ const UserRewards = () => {
     const encodedProof = `${domain}/prover?path=${storageData.path}`;
 
     setEncodedProof(encodedProof);
-    setPath(encodedProof);
     setPath(encodedProof);
     setRewardStatus("");
   };
