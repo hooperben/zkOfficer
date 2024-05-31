@@ -100,6 +100,8 @@ const UserRewards = () => {
   const generateQRProof = async () => {
     setQROpen(true);
 
+    if (path === "") return;
+
     // we need to get the state of the tree (use back end endpoint)
     const response = await fetch("/api/get-history");
 
@@ -138,13 +140,13 @@ const UserRewards = () => {
     const storageData = await storageRequest.json();
 
     const domain = window.location.hostname.includes("vercel")
-      ? window.location.hostname //
+      ? `https://${window.location.hostname}` //
       : "http://localhost:3000";
 
     const encodedProof = `${domain}/prover?path=${storageData.path}`;
 
     setEncodedProof(encodedProof);
-    setPath(storageData.path);
+    setPath(encodedProof);
     setPath(encodedProof);
     setRewardStatus("");
   };
