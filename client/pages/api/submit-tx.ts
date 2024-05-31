@@ -18,7 +18,7 @@ const base64ToUint8Array = (base64: string): Uint8Array => {
 
 // This function can run for a maximum of 5 seconds
 export const config = {
-  maxDuration: 25,
+  maxDuration: 50,
 };
 
 export default async function handler(
