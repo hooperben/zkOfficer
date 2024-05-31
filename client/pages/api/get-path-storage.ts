@@ -24,7 +24,7 @@ export default async function handler(
 
     const s3 = new AWS.S3();
 
-    s3.getObject(params, (err, data) => {
+    s3.getObject(params, (err: any, data: any) => {
       if (data) {
         console.log(JSON.parse(data.Body?.toString()!));
 

@@ -52,7 +52,7 @@ export default async function handler(
       Body: JSON.stringify(contentBody),
     };
 
-    s3.upload(params, (err, data) => {
+    s3.upload(params, (err: any, data: any) => {
       if (data) {
         // console.log(JSON.parse(data.Body?.toString()!));
         return res.status(200).json({ path });
