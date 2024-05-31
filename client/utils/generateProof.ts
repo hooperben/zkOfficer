@@ -59,8 +59,8 @@ export const generateProof = async (
   const decoder = new AbiCoder();
 
   const formatted = logs.map((log) => {
-    const decodedBytes32 = decoder.decode(["bytes32"], log.topics[0]);
-    const decodedUint256 = decoder.decode(["uint256"], log.topics[1]);
+    const decodedBytes32 = decoder.decode(["bytes32"], log.topics[1]);
+    const decodedUint256 = decoder.decode(["uint256"], log.topics[2]);
 
     return {
       leaf: decodedBytes32.toString(),

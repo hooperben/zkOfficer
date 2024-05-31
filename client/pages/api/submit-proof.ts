@@ -84,7 +84,7 @@ export default async function handler(
     res.status(200).json({
       txHash: receipt.hash,
       // @ts-ignore
-      leafIndex: [BigInt(logs[0].topics[1]).toString()],
+      leafIndex: [BigInt(logs[0].topics[2]).toString()],
     });
   } else {
     res.status(404).json({ result: true, message: "nothing here sorry" });

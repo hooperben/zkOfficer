@@ -287,7 +287,7 @@ const UserRewards = () => {
         <Tile
           imageSrc="/human-proof.webp"
           title="Digital Proof of Your Credentials"
-          description="Generate a QR code that proves that you have a valid zkLicense, without revealing anything about you (well, your username)."
+          description="Generate a QR code that proves that you have a valid zkLicense, without revealing anything about you."
           buttonText="Generate Proof"
           onButtonClick={generateQRProof}
         />
