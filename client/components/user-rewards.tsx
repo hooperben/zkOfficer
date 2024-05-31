@@ -11,6 +11,11 @@ import useLeafInfo from "@/hooks/useLeafInfo";
 import useMintInfo from "@/hooks/useMintInfo";
 import useUsernameStore from "@/hooks/useUsernameStore";
 import useStore from "@/hooks/useStore";
+import usePathStore from "@/hooks/usePathStore";
+
+function uint8ArrayToString(array: Uint8Array): string {
+  return String.fromCharCode.apply(null, Array.from(array));
+}
 
 const UserRewards = () => {
   const [qrOpen, setQROpen] = useState(false);
@@ -21,6 +26,7 @@ const UserRewards = () => {
   const { mintTx, setMintTx } = useMintInfo();
   const { username } = useUsernameStore();
   const { userSecret } = useStore();
+  const { path, setPath } = usePathStore();
 
   const { leafIndex } = useLeafInfo();
 
@@ -113,16 +119,33 @@ const UserRewards = () => {
       userSecret,
       true
     );
-    const formatted = btoa(String.fromCharCode(...Array.from(proof.proof)));
+
+    const storageRequest = await fetch("/api/write-qr-code", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        proof: uint8ArrayToString(proof.proof),
+        publicInputs: proof.publicInputs,
+      }),
+    });
+
+    if (!storageRequest.ok) {
+      throw new Error("Something went wrong :(");
+    }
+
+    const storageData = await storageRequest.json();
 
     const domain = window.location.hostname.includes("vercel")
       ? window.location.hostname //
       : "http://localhost:3000";
 
-    const encodedProof = `${domain}?p=${formatted}&z=${proof.publicInputs[0]}`;
+    const encodedProof = `${domain}/prover?path=${storageData.path}`;
 
     setEncodedProof(encodedProof);
-
+    setPath(storageData.path);
+    setPath(encodedProof);
     setRewardStatus("");
   };
 
@@ -188,20 +211,18 @@ const UserRewards = () => {
           {rewardStatus && <p className="mt-4">{rewardStatus}</p>}
         </div>
 
-        {encodedProof && (
-          <div className="flex flex-col">
+        {(encodedProof || path) && (
+          <div className="flex flex-col justify-center w-[100%] align-center content-center text-center">
             <div>
-              <p className="mb-4">
-                Show this QR code to prove you have a valid credential (without
-                revealing any of your details.)
+              <p className="mb-4 max-w-[400px]">
+                Show this QR code to prove you have a valid zkLicense (without
+                revealing any of your details).
               </p>
             </div>
 
-            <QRCode
-              value={encodedProof}
-              size={300}
-              style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-            />
+            <div className="flex w-[100%] justify-center text-cente mb-4">
+              <QRCode value={path || encodedProof} size={300} />
+            </div>
 
             <button
               onClick={copyToClipboard}

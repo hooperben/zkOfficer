@@ -6,6 +6,7 @@ import Modal from "./Modal";
 import useLeafInfo from "@/hooks/useLeafInfo";
 import useMintInfo from "@/hooks/useMintInfo";
 import useUsernameStore from "@/hooks/useUsernameStore";
+import Link from "next/link";
 
 const Header = () => {
   const { userSecret, setUserSecret } = useStore();
@@ -113,10 +114,17 @@ const Header = () => {
         </div>
       </Modal>
 
-      <div className="flex flew-row align-center ml-[-40px]">
-        <Image src="/zkOfficer.webp" alt="zkOfficer" width={150} height={150} />
-        <h1 className=" ml-[-20px] mt-[60px] text-xl font-mono">zk0fficer</h1>
-      </div>
+      <Link href="/">
+        <div className="flex flew-row align-center ml-[-40px]">
+          <Image
+            src="/zkOfficer.webp"
+            alt="zkOfficer"
+            width={150}
+            height={150}
+          />
+          <h1 className=" ml-[-20px] mt-[60px] text-xl font-mono">zk0fficer</h1>
+        </div>
+      </Link>
 
       {userSecret !== "" && (
         <div className="mt-12">

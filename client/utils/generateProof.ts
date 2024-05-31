@@ -31,8 +31,10 @@ export async function getCircuit() {
 export const idNullifier = () =>
   poseidonHash(["0x38d932809A3642050ef2A83E96F59042BfCAB777"]);
 
-export const verifyIdProof = async (proof: Uint8Array, root: string) => {
-  console.log(proof);
+export const verifyIdProof = async (
+  proof: Uint8Array,
+  publicInputs: string[]
+) => {
   await ensurePoseidon();
 
   const circuit = await getCircuit();
@@ -42,8 +44,8 @@ export const verifyIdProof = async (proof: Uint8Array, root: string) => {
   const noir = new Noir(circuit, backend);
 
   return await noir.verifyProof({
-    proof: proof,
-    publicInputs: [root, idNullifier()],
+    proof,
+    publicInputs,
   });
 };
 
