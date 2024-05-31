@@ -18,6 +18,11 @@ type Data =
       leafIndex: string;
     };
 
+// This function can run for a maximum of 5 seconds
+export const config = {
+  maxDuration: 25,
+};
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
