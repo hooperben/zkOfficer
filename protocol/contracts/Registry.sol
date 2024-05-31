@@ -5,7 +5,7 @@ import "./merkle/plonk_vk.sol";
 import "./MerkleTreeWithHistory.sol";
 
 contract Registry is MerkleTreeWithHistory {
-    event NewLeaf(bytes32 indexedleaf, uint256 indexed leafIndex);
+    event NewLeaf(bytes32 indexed indexedleaf, uint256 indexed leafIndex);
 
     UltraVerifier public verifier;
     address public authority;
