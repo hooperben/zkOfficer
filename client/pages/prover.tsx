@@ -220,7 +220,7 @@ const Prover = () => {
                       The Public Inputs of the Proof
                     </td>
                     <td className="break-words max-w-[1000px] text-center p-2">
-                      {proof.publicInputs.map((item) => (
+                      {proof.publicInputs.map((item: string) => (
                         <p key={item}>{item}</p>
                       ))}
                     </td>
