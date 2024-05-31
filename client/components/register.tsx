@@ -48,7 +48,10 @@ const Register = () => {
       return data;
     }
 
-    return { error: "Your proof isn't valid, sorry brussy/brussette :(" };
+    return {
+      error:
+        "This could be because of a few reasons, sorry brussy/brussette :(",
+    };
   };
 
   const { mutateAsync, isPending } = useMutation({
