@@ -209,7 +209,15 @@ const UserRewards = () => {
               </svg>
             </div>
           )}
-          {rewardStatus && <p className="mt-4">{rewardStatus}</p>}
+          {rewardStatus && (
+            <div className="flex flex-col text-center">
+              <p className="mt-4">{rewardStatus}</p>
+              <p className="mt-4 max-w-[400px]">
+                (this process takes a long time on mobile devices, and can
+                sometimes break on certain browsers with no warnings 🥴)
+              </p>
+            </div>
+          )}
         </div>
 
         {(encodedProof || path) && (
